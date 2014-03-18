@@ -532,8 +532,8 @@ class Robot(object):
 		try:
 			from PIL import Image
 		except ImportError as e:
-			print e
-			print "Need to have PIL installed! See: effbot.org for download"
+			print(e)
+			print("Need to have PIL installed! See: effbot.org for download")
 			sys.exit()
 
 		return self._make_image_from_buffer(self._get_screen_buffer(bounds))
@@ -560,13 +560,13 @@ class Robot(object):
 			height = bottom - top
 
 		hDesktopDC = user32.GetWindowDC(hDesktopWnd)
-		if not hDesktopDC: print 'GetDC Failed'; sys.exit()
+		if not hDesktopDC: print('GetDC Failed'); sys.exit()
 
 		hCaptureDC = gdi.CreateCompatibleDC(hDesktopDC)
-		if not hCaptureDC: print 'CreateCompatibleBitmap Failed'; sys.exit()
+		if not hCaptureDC: print('CreateCompatibleBitmap Failed'); sys.exit()
 
 		hCaptureBitmap = gdi.CreateCompatibleBitmap(hDesktopDC, width, height)
-		if not hCaptureBitmap: print 'CreateCompatibleBitmap Failed'; sys.exit()
+		if not hCaptureBitmap: print('CreateCompatibleBitmap Failed'); sys.exit()
 
 		gdi.SelectObject(hCaptureDC, hCaptureBitmap)
 
@@ -599,7 +599,7 @@ class Robot(object):
 
 		bmp_info.bmiHeader.biSizeImage = bmp_info.bmiHeader.biWidth *abs(bmp_info.bmiHeader.biHeight) * (bmp_info.bmiHeader.biBitCount+7)/8;
 		size = (bmp_info.bmiHeader.biWidth, bmp_info.bmiHeader.biHeight )
-		# print size
+		# print(size)
 		pBuf = (c_char * bmp_info.bmiHeader.biSizeImage)()
 
 		gdi.GetBitmapBits(hCaptureBitmap, bmp_info.bmiHeader.biSizeImage, pBuf)
@@ -649,8 +649,8 @@ class Robot(object):
 		try:
 			index = KeyConsts.key_names.index(key_char.lower())
 		except ValueError as e:
-			print e
-			print ('Usage Note: all keys are underscor delimted, '
+			print(e)
+			print('Usage Note: all keys are underscor delimted, '
 				'e.g. "left_mouse_button", or "up_arrow."\n'
 				'View KeyConsts class for list of key_names')
 			sys.exit()
@@ -683,10 +683,10 @@ class Robot(object):
 
 	def _handle_input(self, key):
 		if ord(key) in range(65, 91):
-			# print 'Capital =', True
+			# print('Capital =', True)
 			self._capitalize(key)
 		elif key in KeyConsts.special_keys:
-			# print 'Punctuation =', True
+			# print('Punctuation =', True)
 			normalized_key = self._get_unshifted_key(key)
 			self._capitalize(normalized_key)
 		else:
@@ -871,8 +871,8 @@ class Robot(object):
 
 		display_coordinates = []
 		def _monitorEnumProc(hMonitor, hdcMonitor, lprcMonitor, dwData):
-			# print 'call result:', hMonitor, hdcMonitor, lprcMonitor, dwData
-			# print 'DC:', user32.GetWindowDC(hMonitor)
+			# print('call result:', hMonitor, hdcMonitor, lprcMonitor, dwData)
+			# print('DC:', user32.GetWindowDC(hMonitor))
 
 			coordinates = (
 				lprcMonitor.contents.left,
@@ -1034,8 +1034,8 @@ class Robot(object):
 # 						y = col/self.search_image_width
 # 						x = col % self.search_image_width
 # 						# self.out_queue.put((x, y, x + self.template_width, y + self.template_height))
-# 						# print self.out_queue.qsize()
-# 						print 'Match found at:', (x, y, x + self.template_width, y + self.template_height)
+# 						# print(self.out_queue.qsize())
+# 						print('Match found at:', (x, y, x + self.template_width, y + self.template_height))
 # 						robot.draw_box((x, y, x + self.template_width, y + self.template_height), (0,255,0))
 
 
@@ -1043,7 +1043,7 @@ class Robot(object):
 # 	robot = Robot()
 
 # 	# # robot.draw_pixels((255,255,255))
-# 	# # print robot.get_mouse_pos()
+# 	# # print(robot.get_mouse_pos())
 # 	# # (546, 212)
 
 # 	import array
@@ -1061,24 +1061,24 @@ class Robot(object):
 
 # 	template = multiprocessing.Array('i', list(im.getdata()))
 # 	template_width, template_height = im.size
-# 	print template, template_width, template_height
+# 	print(template, template_width, template_height)
 
 # 	# source_line = to_match_data[0:img_to_match.size[0]]
 # 	# source = [to_match_data[x:img_to_match.size[0] + x] for x in xrange(0, len(to_match_data), img_to_match.size[0])]
-# 	# # print 'Source:', len(source[0]), len(source[1])
+# 	# # print('Source:', len(source[0]), len(source[1]))
 # 	# # cross_section = [source[x][x] for x in range(len(source))]
-# 	# # print cross_section
+# 	# # print(cross_section)
 
 # 	search_image_size, data = robot.match_template()
 # 	search_image_width, search_image_height = search_image_size
 # 	search_image = multiprocessing.Array('i', list(data))
 
 # 	cpus = 2
-# 	print len(search_image)
+# 	print(len(search_image))
 # 	stepsize = len(search_image) / (cpus)
 # 	search_ranges = [_ for _ in range(0, len(search_image) + 1, stepsize)]
 # 	search_ranges[-1] = search_ranges[-1] - template_width
-# 	print search_ranges
+# 	print(search_ranges)
 
 # 	pool = []
 # 	process_queue = multiprocessing.Queue()
@@ -1090,7 +1090,7 @@ class Robot(object):
 # 		p.start()
 # 		pool.append(p)
 
-# 	print 'Searching...'
+# 	print('Searching...')
 # 	for i in zip(search_ranges, search_ranges[1:]):
 # 		process_queue.put(i)
 # 	for i in range(10): process_queue.put('')
@@ -1098,17 +1098,17 @@ class Robot(object):
 
 # 	for i in range(output_queue.qsize()):
 # 		a = output_queue.get()
-# 		print a
+# 		print(a)
 # 		robot.draw_box(a, (0,255,0))
 
 
 
-# 	# print search_image, search_image_size
+# 	# print(search_image, search_image_size)
 
 # 	# matches = []
 # 	# for col in xrange(len(search_image) - template_width):
 # 	# 	if search_image[col : template_width + col] == template[0:template_width]:
-# 	# 		print True, col/search_image_width, col % search_image_width
+# 	# 		print(True, col/search_image_width, col % search_image_width)
 # 	# 		# results = map(get_matches, range(1, template_height))
 # 	# 		# if sum(results) > (template_height / 2): # see if at least half of the tests were matches. If so, sure, let's call it a match!
 # 	# 		# 	matches.append((col/search_image_width, col % search_image_width, col/search_image_width + template_width, col%search_image_width + template_height))
@@ -1118,7 +1118,7 @@ class Robot(object):
 # 	# 		for j in range(1, template_height):
 # 	# 			r.append(search_image[col + (search_image_width * j): template_width + (search_image_width * j) + col] == template[(template_width * j) : (template_width * (j + 1))])
 # 	# # 		break
-# 	# print matches
+# 	# print(matches)
 	# def get_matches(j):
 	# 	row_index = search_image_width * j
 	# 	return (search_image[
@@ -1134,7 +1134,7 @@ class Robot(object):
 	# 			y = col/search_image_width
 	# 			x = col % search_image_width
 				# out_queue.put((x, y, x + template_width, y + template_height))
-				# print out_queue.qsize()
+				# print(out_queue.qsize())
 				# robot.draw_box((x, y, x + template_width, y + template_height), (0,255,0))
 
 
