@@ -33,6 +33,7 @@ import ctypes
 import multiprocessing
 from ctypes import *
 from ctypes.wintypes import *
+import contextlib
 
 
 user32 = windll.user32
@@ -162,7 +163,6 @@ class KeyConsts(object):
 
 
 class Keys(object):
-	space=32
 	left_mouse_button=1
 	right_mouse_button=2
 	control_break_processing=3
@@ -179,12 +179,13 @@ class Keys(object):
 	shift=16
 	ctrl=17
 	alt=18
-	pause=19;
+	pause=19
 	caps_lock=20
 	undefined=22
 	undefined=26
 	esc=27
 	spacebar=32
+	space=32
 	page_up=33
 	page_down=34
 	end=35
@@ -506,6 +507,7 @@ class Robot(object):
 		# close it
 		user32.CloseClipboard()
 		# Technologic
+
 	def clear_clipboard(self):
 		'''
 		Clear everything out of the clipboard
@@ -606,7 +608,13 @@ class Robot(object):
 
 		return Image.frombuffer('RGB', size, pBuf, 'raw', 'BGRX', 0, 1)
 
-	def press_and_release(self, key):
+	@contextlib.contextmanager
+	def key(self, name):
+		self.key_press(name)
+		yield
+		self.key_release(name)
+
+	def key_press_and_release(self, key):
 		'''
 		Simulates pressing a key: One down event, one release event.
 		'''
@@ -657,7 +665,6 @@ class Robot(object):
 		return KeyConsts.vk_codes[index]
 
 	def _capitalize(self, letter):
-
 		self.key_press('shift')
 		self.key_press(letter)
 		self.key_release('shift')
@@ -934,10 +941,10 @@ class Robot(object):
 
 		'''
 		def _convert_rgb(r, g, b):
-		    r = r & 0xFF
-		    g = g & 0xFF
-		    b = b & 0xFF
-		    return (b << 16) | (g << 8) | r
+			r = r & 0xFF
+			g = g & 0xFF
+			b = b & 0xFF
+			return (b << 16) | (g << 8) | r
 
 		# raise NotImplementedError('Not ready yet. Git outta here!')
 
