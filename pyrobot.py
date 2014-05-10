@@ -4,8 +4,6 @@ A pure python windows automation library loosely modeled after Java's Robot Clas
 
 
 TODO:
-	* Mac support
-	* Allow window section for relative coordinates.
 	* ability to 'paint' target window.
 
 
@@ -27,13 +25,17 @@ SIZE_T    = c_ulong
 '''
 
 
+import contextlib
 import sys
 import time
-import ctypes
-import multiprocessing
+try:
+	from PIL import Image
+except ImportError:
+	Image = None
+
 from ctypes import *
 from ctypes.wintypes import *
-import contextlib
+import ctypes
 
 
 user32 = windll.user32
@@ -163,247 +165,38 @@ class KeyConsts(object):
 
 
 class Keys(object):
-	left_mouse_button=1
-	right_mouse_button=2
-	control_break_processing=3
-	middle_mouse_button_three_button_mouse=4
-	x1_mouse_button=5
-	x2_mouse_button=6
-	undefined=7
-	backspace=8
-	tab=9
-	reserved=10
-	clear=12
-	enter=13
-	undefined=14
-	shift=16
-	ctrl=17
-	alt=18
-	pause=19
-	caps_lock=20
-	undefined=22
-	undefined=26
-	esc=27
-	spacebar=32
-	space=32
-	page_up=33
-	page_down=34
-	end=35
-	home=36
-	left_arrow=37
-	up_arrow=38
-	right_arrow=39
-	down_arrow=40
-	select=41
-	print_key=42
-	execute=43
-	print_screen=44
-	ins=45
-	delete=46
-	help_key=47
-	zero=48
-	one=49
-	two=50
-	three=51
-	four=52
-	five=53
-	six=54
-	seven=55
-	eight=56
-	nine=57
-	undefined=18
-	a=65
-	b=66
-	c=67
-	d=68
-	e=69
-	f=70
-	g=71
-	h=72
-	i=73
-	j=74
-	k=75
-	l=76
-	m=77
-	n=78
-	o=79
-	p=80
-	q=81
-	r=82
-	s=83
-	t=84
-	u=85
-	v=86
-	w=87
-	x=88
-	y=89
-	z=90
-	left_windows__natural_board=91
-	right_windows__natural_board=92
-	applications__natural_board=93
-	reserved=94
-	computer_sleep=95
-	numeric_pad_0=96
-	numeric_pad_1=97
-	numeric_pad_2=98
-	numeric_pad_3=99
-	numeric_pad_4=100
-	numeric_pad_5=101
-	numeric_pad_6=102
-	numeric_pad_7=103
-	numeric_pad_8=104
-	numeric_pad_9=105
-	multiply=106
-	add=107
-	separator=108
-	subtract=109
-	decimal=110
-	divide=111
-	f1=112
-	f2=113
-	f3=114
-	f4=115
-	f5=116
-	f6=117
-	f7=118
-	f8=119
-	f9=120
-	f10=121
-	f11=122
-	f12=123
-	f13=124
-	f14=125
-	f15=126
-	f16=127
-	f17=128
-	f18=129
-	f19=130
-	f20=131
-	f21=132
-	f22=133
-	f23=134
-	f24=135
-	unassigned=136
-	num_lock=144
-	scroll_lock=145
-	oem_specific=146
-	unassigned=151
-	left_shift=160
-	right_shift=161
-	left_control=162
-	right_control=163
-	left_menu=164
-	right_menu=165
-	browser_back=166
-	browser_forward=167
-	browser_refresh=168
-	browser_stop=169
-	browser_search=170
-	browser_favorites=171
-	browser_start_and_home=172
-	volume_mute=173
-	volume_down=174
-	volume_up=175
-	next_track=176
-	previous_track=177
-	stop_media=178
-	play_pause_media=179
-	start_mail=180
-	select_media=181
-	start_application_1=182
-	start_application_2=183
-	reserved=184
-	semicolon=186
-	equals=187
-	comma=188
-	minus=189
-	peiod=190
-	forward_slash=191
-	back_tick=192
-	reserved=193
-	unassigned=216
-	open_brace=219
-	backslash=220
-	close_brace=221
-	apostrophe=222
-	reserved=224
-	oem_specific=225
-	either_the_angle_bracket__or_the_backslash__on_the_rt_102__board=226
-	oem_specific=227
-	oem_specific=230
-	unassigned=232
-	oem_specific=233
-	attn=246
-	crsel=247
-	exsel=248
-	erase_eof=249
-	play=250
-	zoom=251
-	reserved=252
-	pa1=253
-	clear=254
+	left_mouse_button=1; right_mouse_button=2; control_break_processing=3; middle_mouse_button_three_button_mouse=4; x1_mouse_button=5; x2_mouse_button=6; undefined=7; backspace=8; tab=9; reserved=10; clear=12; enter=13; undefined=14; shift=16; ctrl=17; alt=18; pause=19; caps_lock=20; undefined=22; undefined=26; esc=27; spacebar=32; space=32; page_up=33; page_down=34; end=35; home=36; left_arrow=37; up_arrow=38; right_arrow=39; down_arrow=40; select=41; print_key=42; execute=43; print_screen=44; ins=45; delete=46; help_key=47; zero=48; one=49; two=50; three=51; four=52; five=53; six=54; seven=55; eight=56; nine=57; undefined=18; a=65; b=66; c=67; d=68; e=69; f=70; g=71; h=72; i=73; j=74; k=75; l=76; m=77; n=78; o=79; p=80; q=81; r=82; s=83; t=84; u=85; v=86; w=87; x=88; y=89; z=90; left_windows__natural_board=91; right_windows__natural_board=92; applications__natural_board=93; reserved=94; computer_sleep=95; numeric_pad_0=96; numeric_pad_1=97; numeric_pad_2=98; numeric_pad_3=99; numeric_pad_4=100; numeric_pad_5=101; numeric_pad_6=102; numeric_pad_7=103; numeric_pad_8=104; numeric_pad_9=105; multiply=106; add=107; separator=108; subtract=109; decimal=110; divide=111; f1=112; f2=113; f3=114; f4=115; f5=116; f6=117; f7=118; f8=119; f9=120; f10=121; f11=122; f12=123; f13=124; f14=125; f15=126; f16=127; f17=128; f18=129; f19=130; f20=131; f21=132; f22=133; f23=134; f24=135; unassigned=136; num_lock=144; scroll_lock=145; oem_specific=146; unassigned=151; left_shift=160; right_shift=161; left_control=162; right_control=163; left_menu=164; right_menu=165; browser_back=166; browser_forward=167; browser_refresh=168; browser_stop=169; browser_search=170; browser_favorites=171; browser_start_and_home=172; volume_mute=173; volume_down=174; volume_up=175; next_track=176; previous_track=177; stop_media=178; play_pause_media=179; start_mail=180; select_media=181; start_application_1=182; start_application_2=183; reserved=184; semicolon=186; equals=187; comma=188; minus=189; peiod=190; forward_slash=191; back_tick=192; reserved=193; unassigned=216; open_brace=219; backslash=220; close_brace=221; apostrophe=222; reserved=224; oem_specific=225; either_the_angle_bracket__or_the_backslash__on_the_rt_102__board=226; oem_specific=227; oem_specific=230; unassigned=232; oem_specific=233; attn=246; crsel=247; exsel=248; erase_eof=249; play=250; zoom=251; reserved=252; pa1=253; clear=254
 
 
-class Robot(object):
-	'''
-	A pure python windows automation library loosely modeled after Java's Robot Class.
-	'''
+class Mouse():
+	def __init__(self, robot=None):
+		if robot is None:
+			robot = Robot()
 
-	def __init__(self, wname=None):
-		wname = wname if wname is not None else user32.GetDesktopWindow()
-		
-		try:
-			wname.lower()
-			hwnd = self.get_window_hwnd(wname)
-			if hwnd:
-				self.hwnd = hwnd
-			else:
-				raise Exception("Invalid window name/hwnd")
-		
-		except AttributeError:
-			self.hwnd = wname
+		self.robot = robot
 
-	def set_mouse_pos(self, x, y):
+	@classmethod
+	def from_robot(cls, robot):
+		return cls(robot=robot)
+
+	def set_pos(self, x, y):
 		'''
 		Moves mouse pointer to given screen coordinates.
 		'''
-		wx, wy = self.pos
+		wx, wy = self.robot.pos
 		user32.SetCursorPos(x+wx, y+wy)
 
-	def get_mouse_pos(self):
+	def get_pos(self):
 		'''
 		Returns current mouse coordinates
 		'''
 		coords = pointer(c_long(0))
 		user32.GetCursorPos(coords)
 		x, y = coords[0], coords[1]
-		wx, wy = self.pos
+		wx, wy = self.robot.pos
 		return x-wx, y-wy
 
-	def get_pixel(self, x=None, y=None):
-		'''
-		Returns the pixel color of the given screen coordinate or the current mouse position
-		'''
-		
-		if x is None or y is None:
-			x, y = self.get_mouse_pos()
-			wx, wy = self.pos
-			x, y = x+wx, y+wy
-		else:
-			wx, wy = self.pos
-			x, y = wx+x, wy+y
-		
-		RGBInt = gdi.GetPixel(
-			user32.GetDC(0),
-			x, y
-		)
-		
-		red = RGBInt & 255
-		green = (RGBInt >> 8) & 255
-		blue = (RGBInt >> 16) & 255
-		return (red, green, blue)
-
-	def mouse_down(self, button):
+	def down(self, button):
 		'''
 		Presses one mouse button. Left, right, or middle
 		'''
@@ -413,12 +206,15 @@ class Robot(object):
 			'right':  (win32con.RIGHT_DOWN, None, None, None, None),
 			'middle': (win32con.MIDDLE_DOWN, None, None, None, None)
 		}
-		
-		user32.mouse_event(
-			*press_events[button.lower()]
-		)
 
-	def mouse_up(self, button):
+		event = press_events.get(button.lower(), None)
+
+		if event:
+			user32.mouse_event(*event)
+		else:
+			raise Exception("button must be on of: left, right, middle")
+
+	def up(self, button):
 		'''
 		Releases mouse button. Left, right, or middle
 		'''
@@ -429,31 +225,34 @@ class Robot(object):
 			'middle': (win32con.MIDDLE_UP, None, None, None, None)
 		}
 		
-		user32.mouse_event(
-			*release_events[button.lower()]
-		)
+		event = press_events.get(button.lower(), None)
 
-	def click_mouse(self, button):
+		if event:
+			user32.mouse_event(*event)
+		else:
+			raise Exception("button must be on of: left, right, middle")
+
+	def click(self, button="left"):
 		'''
 		Simulates a full mouse click. One down event, one up event.
 		'''
-		self.mouse_down(button)
-		self.mouse_up(button)
+		self.down(button)
+		self.up(button)
 
-	def double_click_mouse(self, button):
+	def double_click_mouse(self, button="left"):
 		'''
 		Two full mouse clicks. One down event, one up event.
 		'''
-		self.click_mouse(button)
+		self.click(button)
 		self.sleep(.1)
-		self.click_mouse(button)
+		self.click(button)
 
-	def move_and_click(self, x, y, button):
+	def move_and_click(self, x, y, button="left"):
 		"convenience function: Move to corrdinate and click mouse"
-		self.set_mouse_pos(x,y)
-		self.click_mouse(button)
+		self.set_pos(x,y)
+		self.click(button)
 
-	def scroll_mouse_wheel(self, direction, clicks):
+	def scroll_wheel(self, direction, clicks=1):
 		'''
 		Scrolls the mouse wheel either up or down X number of 'clicks'
 
@@ -470,158 +269,32 @@ class Robot(object):
 	def _scrolldown(self):
 		user32.mouse_event(self.win32con.WHEEL, None, None, -120, None)
 
-	def get_clipboard_data(self):
-		'''
-		Retrieves text from the Windows clipboard
-		as a String
-		'''
-		CF_TEXT = 1
-		user32.OpenClipboard(None)
-		hglb = user32.GetClipboardData(CF_TEXT)
 
-		text_ptr = c_char_p(kernel32.GlobalLock(hglb))
-		kernel32.GlobalUnlock(hglb)
+class Keyboard():
+	def __init__(self, robot=None):
+		if robot is None:
+			robot = Robot()
 
-		return text_ptr.value
+		self.robot = robot
 
-	def add_to_clipboard(self, string):
-		'''
-		Copy text into clip board for later pasting.
-		'''
-		# This is more or less ripped right for MSDN.
-		GHND = 0x0042
-		# Allocate at
-		hGlobalMemory = kernel32.GlobalAlloc(GHND, len(bytes(string))+1)
-		# Lock it
-		lpGlobalMemory = kernel32.GlobalLock(hGlobalMemory)
-		# copy it
-		lpGlobalMemory = kernel32.lstrcpy(lpGlobalMemory, string)
-		# unlock it
-		kernel32.GlobalUnlock(lpGlobalMemory)
-		# open it
-		user32.OpenClipboard(None)
-		# empty it
-		user32.EmptyClipboard()
-		# add it
-		hClipMemory = user32.SetClipboardData(1, hGlobalMemory) # 1 = CF_TEXT
-		# close it
-		user32.CloseClipboard()
-		# Technologic
-
-	def clear_clipboard(self):
-		'''
-		Clear everything out of the clipboard
-		'''
-		user32.OpenClipboard(None)
-		user32.EmptyClipboard()
-		user32.CloseClipboard()
-
-	def _get_monitor_coordinates(self):
-		raise NotImplementedError(".. still working on things :)")
-
-	def take_screenshot(self, bounds=None):
-		'''
-		NOTE:
-			REQUIRES: PYTHON IMAGE LIBRARY
-
-		Takes a snapshot of desktop and loads it into memory as a PIL object.
-
-		TODO:
-			* Add multimonitor support
-
-		'''
-
-		try:
-			from PIL import Image
-		except ImportError as e:
-			print(e)
-			print("Need to have PIL installed! See: effbot.org for download")
-			sys.exit()
-
-		return self._make_image_from_buffer(self._get_screen_buffer(bounds))
-
-	def _get_screen_buffer(self, bounds=None):
-		# Grabs a DC to the entire virtual screen, but only copies to
-		# the bitmap the the rect defined by the user.
-
-		SM_XVIRTUALSCREEN = 76  # coordinates for the left side of the virtual screen.
-		SM_YVIRTUALSCREEN = 77  # coordinates for the right side of the virtual screen.
-		SM_CXVIRTUALSCREEN = 78 # width of the virtual screen
-		SM_CYVIRTUALSCREEN = 79 # height of the virtual screen
-
-		hDesktopWnd = user32.GetDesktopWindow() #Entire virtual Screen
-
-		left = user32.GetSystemMetrics(SM_XVIRTUALSCREEN)
-		top = user32.GetSystemMetrics(SM_YVIRTUALSCREEN)
-		width = user32.GetSystemMetrics(SM_CXVIRTUALSCREEN)
-		height = user32.GetSystemMetrics(SM_CYVIRTUALSCREEN)
-
-		if bounds:
-			left, top, right, bottom = bounds
-			width = right - left
-			height = bottom - top
-
-		hDesktopDC = user32.GetWindowDC(hDesktopWnd)
-		if not hDesktopDC: print('GetDC Failed'); sys.exit()
-
-		hCaptureDC = gdi.CreateCompatibleDC(hDesktopDC)
-		if not hCaptureDC: print('CreateCompatibleBitmap Failed'); sys.exit()
-
-		hCaptureBitmap = gdi.CreateCompatibleBitmap(hDesktopDC, width, height)
-		if not hCaptureBitmap: print('CreateCompatibleBitmap Failed'); sys.exit()
-
-		gdi.SelectObject(hCaptureDC, hCaptureBitmap)
-
-		SRCCOPY = 0x00CC0020
-		gdi.BitBlt(
-			hCaptureDC,
-			0, 0,
-			width, height,
-			hDesktopDC,
-			left, top,
-			0x00CC0020
-		)
-		return hCaptureBitmap
-
-	def _make_image_from_buffer(self, hCaptureBitmap):
-		from PIL import Image
-		bmp_info = BITMAPINFO()
-		bmp_header = BITMAPFILEHEADER()
-		hdc = user32.GetDC(None)
-
-		bmp_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER)
-
-		DIB_RGB_COLORS = 0
-		gdi.GetDIBits(hdc,
-			hCaptureBitmap,
-			0,0,
-			None, byref(bmp_info),
-			DIB_RGB_COLORS
-		)
-
-		bmp_info.bmiHeader.biSizeImage = bmp_info.bmiHeader.biWidth *abs(bmp_info.bmiHeader.biHeight) * (bmp_info.bmiHeader.biBitCount+7)/8;
-		size = (bmp_info.bmiHeader.biWidth, bmp_info.bmiHeader.biHeight )
-		# print(size)
-		pBuf = (c_char * bmp_info.bmiHeader.biSizeImage)()
-
-		gdi.GetBitmapBits(hCaptureBitmap, bmp_info.bmiHeader.biSizeImage, pBuf)
-
-		return Image.frombuffer('RGB', size, pBuf, 'raw', 'BGRX', 0, 1)
+	@classmethod
+	def from_robot(cls, robot):
+		return cls(robot=robot)
 
 	@contextlib.contextmanager
-	def key(self, name):
-		self.key_press(name)
+	def key(self, key):
+		self.key_down(key)
 		yield
-		self.key_release(name)
+		self.key_up(key)
 
-	def key_press_and_release(self, key):
+	def click(self, key):
 		'''
 		Simulates pressing a key: One down event, one release event.
 		'''
-		self.key_press(key)
-		self.key_release(key)
+		self.key_down(key)
+		self.key_up(key)
 
-	def key_press(self, key):
+	def key_down(self, key):
 		''' Presses a given key. '''
 		KEY_PRESS = 0
 
@@ -631,7 +304,7 @@ class Robot(object):
 			vk_code = key
 		self._key_control(key=vk_code, action=KEY_PRESS)
 
-	def key_release(self, key):
+	def key_up(self, key):
 		''' Releases a given key. '''
 		KEY_RELEASE = 0x0002
 
@@ -665,10 +338,8 @@ class Robot(object):
 		return KeyConsts.vk_codes[index]
 
 	def _capitalize(self, letter):
-		self.key_press('shift')
-		self.key_press(letter)
-		self.key_release('shift')
-		self.key_release(letter)
+		with self.key('shift'):
+			self.click(letter)
 
 	def _get_unshifted_key(self, key):
 		index = KeyConsts.special_keys.index(key)
@@ -697,8 +368,8 @@ class Robot(object):
 			normalized_key = self._get_unshifted_key(key)
 			self._capitalize(normalized_key)
 		else:
-			self.key_press(key)
-			self.key_release(key)
+			self.key_down(key)
+			self.key_up(key)
 
 	def type_backwards(self, input_string, delay=.05):
 		'''
@@ -706,9 +377,224 @@ class Robot(object):
 		'''
 		for letter in reversed(input_string):
 			self._handle_input(letter)
-			self.key_press('left_arrow')
-			self.key_release('left_arrow')
+			self.key_down('left_arrow')
+			self.key_up('left_arrow')
 			time.sleep(delay)
+
+	def copy(self):
+		'''
+		convenience function for issuing Ctrl+C copy command
+		'''
+		self.key_down('ctrl')
+		self.key_down('c')
+		self.key_up('c')
+		self.key_up('ctrl')
+
+	def paste(self):
+		'''
+		convenience function for pasting whatever is in the clipboard
+		'''
+		self.key_down('ctrl')
+		self.key_down('v')
+		self.key_up('v')
+		self.key_up('ctrl')
+
+
+class Robot(object):
+	'''
+	A pure python windows automation library loosely modeled after Java's Robot Class.
+	'''
+
+	def __init__(self, wname=None):
+		wname = wname if wname is not None else user32.GetDesktopWindow()
+		
+		try:
+			wname.lower()
+			hwnd = self.get_window_hwnd(wname)
+			if hwnd:
+				self.hwnd = hwnd
+			else:
+				raise Exception("Invalid window name/hwnd")
+		
+		except AttributeError:
+			self.hwnd = wname
+
+		self.mouse = Mouse.from_robot(self)
+		self.keyboard = Keyboard.from_robot(self)
+
+	def sleep(self, duration):
+		'''
+		Pauses the robot for `duration` number of seconds.
+		'''
+		time.sleep(duration)
+
+	def get_pixel(self, x=None, y=None):
+		'''
+		Returns the pixel color of the given screen coordinate or the current mouse position
+		'''
+		
+		if x is None or y is None:
+			x, y = self.mouse.get_pos()
+			wx, wy = self.pos
+			x, y = wx+x, wy+y
+		else:
+			wx, wy = self.pos
+			x, y = wx+x, wy+y
+		
+		RGBInt = gdi.GetPixel(
+			user32.GetDC(0),
+			x, y
+		)
+		
+		red = RGBInt & 255
+		green = (RGBInt >> 8) & 255
+		blue = (RGBInt >> 16) & 255
+		return (red, green, blue)
+
+	def get_clipboard(self):
+		'''
+		Retrieves text from the Windows clipboard
+		as a String
+		'''
+		CF_TEXT = 1
+		user32.OpenClipboard(None)
+		hglb = user32.GetClipboardData(CF_TEXT)
+
+		text_ptr = c_char_p(kernel32.GlobalLock(hglb))
+		kernel32.GlobalUnlock(hglb)
+
+		try:
+			return str(text_ptr.value, "utf-8")
+		except UnicodeError:
+			return text_ptr.value
+
+	def set_clipboard(self, string):
+		'''
+		Copy text into clip board for later pasting.
+		'''
+
+		#Try to encode in UTF-8 and if it fails, assume it's bytes
+		try:
+			string = bytes(string, "utf-8")
+		except TypeError:
+			pass
+
+		# This is more or less ripped right for MSDN.
+		GHND = 0x0042
+		CF_TEXT = 1
+		# Allocate at
+		hGlobalMemory = kernel32.GlobalAlloc(GHND, len(string)+1)
+		# Lock it
+		lpGlobalMemory = kernel32.GlobalLock(hGlobalMemory)
+		# copy it
+		lpGlobalMemory = kernel32.lstrcpy(lpGlobalMemory, string)
+		# unlock it
+		kernel32.GlobalUnlock(lpGlobalMemory)
+		# open it
+		user32.OpenClipboard(None)
+		# empty it
+		user32.EmptyClipboard()
+		# add it
+		hClipMemory = user32.SetClipboardData(CF_TEXT, hGlobalMemory)
+		# close it
+		user32.CloseClipboard()
+		# Technologic
+
+	def clear_clipboard(self):
+		'''
+		Clear everything out of the clipboard
+		'''
+		user32.OpenClipboard(None)
+		user32.EmptyClipboard()
+		user32.CloseClipboard()
+
+	def take_screenshot(self, bounds=None):
+		'''
+		NOTE:
+			REQUIRES: PYTHON IMAGE LIBRARY
+
+		Takes a snapshot of desktop and loads it into memory as a PIL object.
+
+		'''
+
+		if not Image:
+			raise Exception("PIL/Pillow Needed")
+
+		#With this we can pass in a Robot object
+		if bounds is not None:
+			try:
+				bounds = bounds.get_window_bounds()
+			except AttributeError:
+				pass
+
+		return self._make_image_from_buffer(self._get_screen_buffer(bounds))
+
+	def _get_screen_buffer(self, bounds=None):
+		# Grabs a DC to the entire virtual screen, but only copies to
+		# the bitmap the the rect defined by the user.
+
+		SM_XVIRTUALSCREEN = 76  # coordinates for the left side of the virtual screen.
+		SM_YVIRTUALSCREEN = 77  # coordinates for the right side of the virtual screen.
+		SM_CXVIRTUALSCREEN = 78 # width of the virtual screen
+		SM_CYVIRTUALSCREEN = 79 # height of the virtual screen
+
+		hDesktopWnd = user32.GetDesktopWindow() #Entire virtual Screen
+
+		left = user32.GetSystemMetrics(SM_XVIRTUALSCREEN)
+		top = user32.GetSystemMetrics(SM_YVIRTUALSCREEN)
+		width = user32.GetSystemMetrics(SM_CXVIRTUALSCREEN)
+		height = user32.GetSystemMetrics(SM_CYVIRTUALSCREEN)
+
+		if bounds:
+			left, top, right, bottom = bounds
+			width = right - left
+			height = bottom - top
+
+		hDesktopDC = user32.GetWindowDC(hDesktopWnd)
+		if not hDesktopDC: raise Exception('GetDC Failed')
+
+		hCaptureDC = gdi.CreateCompatibleDC(hDesktopDC)
+		if not hCaptureDC: raise Exception('CreateCompatibleBitmap Failed')
+
+		hCaptureBitmap = gdi.CreateCompatibleBitmap(hDesktopDC, width, height)
+		if not hCaptureBitmap: raise Exception('CreateCompatibleBitmap Failed')
+
+		gdi.SelectObject(hCaptureDC, hCaptureBitmap)
+
+		SRCCOPY = 0x00CC0020
+		gdi.BitBlt(
+			hCaptureDC,
+			0, 0,
+			width, height,
+			hDesktopDC,
+			left, top,
+			0x00CC0020
+		)
+		return hCaptureBitmap
+
+	def _make_image_from_buffer(self, hCaptureBitmap):
+		bmp_info = BITMAPINFO()
+		bmp_header = BITMAPFILEHEADER()
+		hdc = user32.GetDC(None)
+
+		bmp_info.bmiHeader.biSize = sizeof(BITMAPINFOHEADER)
+
+		DIB_RGB_COLORS = 0
+		gdi.GetDIBits(hdc,
+			hCaptureBitmap,
+			0,0,
+			None, byref(bmp_info),
+			DIB_RGB_COLORS
+		)
+
+		bmp_info.bmiHeader.biSizeImage = bmp_info.bmiHeader.biWidth * abs(bmp_info.bmiHeader.biHeight) * (bmp_info.bmiHeader.biBitCount+7)//8
+		size = (bmp_info.bmiHeader.biWidth, bmp_info.bmiHeader.biHeight )
+		# print(size)
+		pBuf = (c_char * bmp_info.bmiHeader.biSizeImage)()
+
+		gdi.GetBitmapBits(hCaptureBitmap, bmp_info.bmiHeader.biSizeImage, pBuf)
+
+		return Image.frombuffer('RGB', size, pBuf, 'raw', 'BGRX', 0, 1)
 
 	def start_program(self, full_path):
 		'''
@@ -764,41 +650,15 @@ class Robot(object):
 			None,
 			byref(startupinfo),
 			byref(processInformation)
-			)
-
-	def copy(self):
-		'''
-		convenience function for issuing Ctrl+C copy command
-		'''
-		self.key_press('ctrl')
-		self.key_press('c')
-		self.key_release('c')
-		self.key_release('ctrl')
-
-	def paste(self):
-		'''
-		convenience function for pasting whatever is in the clipboard
-		'''
-		self.key_press('ctrl')
-		self.key_press('v')
-		self.key_release('v')
-		self.key_release('ctrl')
-
-	def sleep(self, duration):
-		'''
-		Pauses the robot for `duration` number of seconds.
-		'''
-		time.sleep(duration)
+		)
 
 	def _enumerate_windows(self, visible=True):
 		'''
-		Loops through the titles of all the "windows."
+		Loops through the titles of all the "windows"
 		Spits out too much junk to to be of immidiate use.
 		Keeping it here to remind me how the ctypes
 		callbacks work.
 		'''
-
-		# raise NotImplementedError('Not ready yet. Git outta here!')
 		
 		titles = []
 		handlers = []
@@ -807,16 +667,24 @@ class Robot(object):
 			length = user32.GetWindowTextLengthW(hwnd) + 1
 			b = ctypes.create_unicode_buffer(length)
 			user32.GetWindowTextW(hwnd, b, length)
-			if visible and user32.IsWindowVisible(hwnd):
-				title = b.value
+			title = b.value
+			if visible:
+				if user32.IsWindowVisible(hwnd):
+					if title:
+						titles.append(title)
+						handlers.append(hwnd)
+			else:
 				if title:
 					titles.append(title)
 					handlers.append(hwnd)
+
 			return True
 
-		WNDENUMPROC = ctypes.WINFUNCTYPE(BOOL,
-										 HWND,
-										 LPARAM)
+		WNDENUMPROC = ctypes.WINFUNCTYPE(
+			BOOL,
+			HWND,
+			LPARAM
+		)
 
 		if not user32.EnumWindows(WNDENUMPROC(worker), True):
 			raise ctypes.WinError()
@@ -958,225 +826,4 @@ class Robot(object):
 			c_int(x),
 			c_int(y),
 			rgb
-			)
-
-	def match_template(self):
-		import ImageOps
-		im = ImageOps.grayscale(self.take_screenshot(self.get_display_monitors()[0]))
-		# im = ImageOps.grayscale(self.take_screenshot())
-		return im.size, im.getdata()
-
-
-# GAH! Look not at this!
-#
-#
-# Me no smart at template matching..
-#
-#
-#
-# def build_match_box2(data, source):
-# 	data = data
-# 	source = source
-# 	while True:
-# 		row, col, img_size = yield
-# 		match_box = [data[row + x][col : img_size + col] for x in xrange(img_size)]
-# 		yield match_box == source
-
-# def mmmm(dataa, sourcee):
-# 	def build_match_box(x):
-# 		data = dataa
-# 		source = sourcee
-# 		row, col, img_size = x
-# 		match_box = [data[row + x][col : img_size + col] for x in xrange(img_size)]
-# 		return match_box == source
-# 	return build_match_box
-
-# def build_match_box(x):
-# 	data, source, row, col, img_size = x
-# 	match_box = [data[row + x][col : img_size + col] for x in xrange(img_size)]
-# 	return match_box == source
-
-# def builder(p,t):
-# 	p_matrix = p
-# 	template = t
-# 	while True:
-# 		row, col, img_size = yield
-# 		match_box = [data[row + x][col : img_size + col] for x in xrange(img_size)]
-# 		yield match_box == source
-
-
-# class Worker(multiprocessing.Process):
-# 	def __init__(self, p_queue, o_queue, search_image,
-# 			search_image_width, template, template_width, template_height):
-# 		multiprocessing.Process.__init__(self)
-# 		self.in_queue = p_queue
-# 		self.out_queue = o_queue
-# 		self.search_image = search_image
-# 		self.search_image_width = search_image_width
-# 		self.template = template
-# 		self.template_width = template_width
-# 		self.template_height = template_height
-
-# 	def run(self):
-# 		robot = Robot()
-# 		def get_matches(j):
-# 			row_index = self.search_image_width * j
-# 			return (self.search_image[
-# 						col + row_index : self.template_width + row_index + col]
-# 						== self.template[(self.template_width * j) : (self.template_width * (j + 1))])
-
-# 		while True:
-# 			queue_item = self.in_queue.get()
-
-# 			if isinstance(queue_item, str):
-# 				break
-
-# 			start_pos, end_pos = queue_item
-
-# 			for col in range(start_pos, end_pos):
-# 				if (self.search_image[col : self.template_width + col] == self.template[0:self.template_width] and
-# 					self.search_image[col + self.search_image_width * 4: self.template_width + (self.search_image_width * 4) + col] == self.template[(self.template_width * 4) : (self.template_width * (4 + 1))]):
-# 					results = map(get_matches, range(1, self.template_height))
-# 					if sum(results) == self.template_height - 1:
-# 						y = col/self.search_image_width
-# 						x = col % self.search_image_width
-# 						# self.out_queue.put((x, y, x + self.template_width, y + self.template_height))
-# 						# print(self.out_queue.qsize())
-# 						print('Match found at:', (x, y, x + self.template_width, y + self.template_height))
-# 						robot.draw_box((x, y, x + self.template_width, y + self.template_height), (0,255,0))
-
-
-# def _playing_around_ignore_me():
-# 	robot = Robot()
-
-# 	# # robot.draw_pixels((255,255,255))
-# 	# # print(robot.get_mouse_pos())
-# 	# # (546, 212)
-
-# 	import array
-# 	import Image
-# 	import math
-# 	import ImageOps
-# 	import multiprocessing
-
-# 	# im = ImageOps.grayscale(robot.take_screenshot((100,100, 150, 150)))
-# 	# im = ImageOps.grayscale(robot.take_screenshot((500,520, 600, 700)))
-# 	# im.save('whooo.png', 'png')
-# 	im = ImageOps.grayscale(Image.open('template2.png'))
-# 	# img_to_match = Image.open('whooo.bmp')
-# 	import time
-
-# 	template = multiprocessing.Array('i', list(im.getdata()))
-# 	template_width, template_height = im.size
-# 	print(template, template_width, template_height)
-
-# 	# source_line = to_match_data[0:img_to_match.size[0]]
-# 	# source = [to_match_data[x:img_to_match.size[0] + x] for x in xrange(0, len(to_match_data), img_to_match.size[0])]
-# 	# # print('Source:', len(source[0]), len(source[1]))
-# 	# # cross_section = [source[x][x] for x in range(len(source))]
-# 	# # print(cross_section)
-
-# 	search_image_size, data = robot.match_template()
-# 	search_image_width, search_image_height = search_image_size
-# 	search_image = multiprocessing.Array('i', list(data))
-
-# 	cpus = 2
-# 	print(len(search_image))
-# 	stepsize = len(search_image) / (cpus)
-# 	search_ranges = [_ for _ in range(0, len(search_image) + 1, stepsize)]
-# 	search_ranges[-1] = search_ranges[-1] - template_width
-# 	print(search_ranges)
-
-# 	pool = []
-# 	process_queue = multiprocessing.Queue()
-# 	output_queue = multiprocessing.Queue()
-# 	for i in range(cpus):
-# 		p = Worker(process_queue, output_queue,
-# 			search_image, search_image_width,
-# 			template, template_width, template_height)
-# 		p.start()
-# 		pool.append(p)
-
-# 	print('Searching...')
-# 	for i in zip(search_ranges, search_ranges[1:]):
-# 		process_queue.put(i)
-# 	for i in range(10): process_queue.put('')
-# 	for i in pool: i.join()
-
-# 	for i in range(output_queue.qsize()):
-# 		a = output_queue.get()
-# 		print(a)
-# 		robot.draw_box(a, (0,255,0))
-
-
-
-# 	# print(search_image, search_image_size)
-
-# 	# matches = []
-# 	# for col in xrange(len(search_image) - template_width):
-# 	# 	if search_image[col : template_width + col] == template[0:template_width]:
-# 	# 		print(True, col/search_image_width, col % search_image_width)
-# 	# 		# results = map(get_matches, range(1, template_height))
-# 	# 		# if sum(results) > (template_height / 2): # see if at least half of the tests were matches. If so, sure, let's call it a match!
-# 	# 		# 	matches.append((col/search_image_width, col % search_image_width, col/search_image_width + template_width, col%search_image_width + template_height))
-
-# 	# # 		# DO NOT REMOVE. WORKS.
-# 	# 		r = []
-# 	# 		for j in range(1, template_height):
-# 	# 			r.append(search_image[col + (search_image_width * j): template_width + (search_image_width * j) + col] == template[(template_width * j) : (template_width * (j + 1))])
-# 	# # 		break
-# 	# print(matches)
-	# def get_matches(j):
-	# 	row_index = search_image_width * j
-	# 	return (search_image[
-	# 				col + row_index : template_width + row_index + col]
-	# 				== template[(template_width * j) : (template_width * (j + 1))])
-
-
-	# for col in range(len(search_image) - template_width):
-	# 	if (search_image[col : template_width + col] == template[0:template_width] and
-	# 		search_image[col + search_image_width * 4: template_width + (search_image_width * 4) + col] == template[(template_width * 4) : (template_width * (4 + 1))]):
-	# 		results = map(get_matches, range(1, template_height))
-	# 		if sum(results) == template_height - 1:
-	# 			y = col/search_image_width
-	# 			x = col % search_image_width
-				# out_queue.put((x, y, x + template_width, y + template_height))
-				# print(out_queue.qsize())
-				# robot.draw_box((x, y, x + template_width, y + template_height), (0,255,0))
-
-
-# # No threads: [Finished in 20.2s]
-# # No threads: [Finished in 20.3s]
-# # w/ 8 cores: [Finished in 17.6s]
-# # w/ 8 cores: [Finished in 17.6s]
-# # w/ 4 cores: [Finished in 16.3s]
-# # w/ 4 cores: [Finished in 16.2s]
-# # w/ 2 cores:
-
-def get_cpus():
-	cpus = multiprocessing.cpu_count()
-	if cpus >2:
-		return cpus/2
-	return 1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		)
