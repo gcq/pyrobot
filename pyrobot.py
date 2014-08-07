@@ -212,7 +212,7 @@ class Mouse():
 		if event:
 			user32.mouse_event(*event)
 		else:
-			raise Exception("button must be on of: left, right, middle")
+			raise Exception("button must be one of: left, right, middle")
 
 	def up(self, button):
 		'''
@@ -230,7 +230,7 @@ class Mouse():
 		if event:
 			user32.mouse_event(*event)
 		else:
-			raise Exception("button must be on of: left, right, middle")
+			raise Exception("button must be one of: left, right, middle")
 
 	def click(self, button="left"):
 		'''
